@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Owner Dashboard — POV-ZEN</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">POV-ZEN</div>
+  <div class="user-meta">
+    <span id="user-name"></span>
+    <button class="btn-secondary btn-sm" onclick="logout()">Log out</button>
+  </div>
+</div>
+
+<nav class="nav-tabs" id="tabs">
+  <a href="#overview" data-tab="overview" class="active">Overview</a>
+  <a href="#requests" data-tab="requests">Join Requests</a>
+  <a href="#users" data-tab="users">Users</a>
+  <a href="#food" data-tab="food">Food</a>
+  <a href="#announcements" data-tab="announcements">Announcements</a>
+  <a href="#issues" data-tab="issues">Issues</a>
+  <a href="#rent" data-tab="rent">Rent</a>
+  <a href="#documents" data-tab="documents">Documents</a>
+  <a href="#settings" data-tab="settings">Settings</a>
+</nav>
+
+<div class="container">
+  <p class="text-muted" id="welcome-line" style="margin-bottom:1rem;"></p>
+  <div id="alert-box" hidden></div>
+
+  <section id="panel-overview" class="panel">
+    <div class="grid cols-2">
+      <div class="card">
+        <h2 id="pg-name-heading">Your PG</h2>
+        <p><strong>Group ID:</strong> <span id="overview-group-id"></span></p>
+        <p><strong>Residents:</strong> <span id="overview-user-count">—</span></p>
+        <p><strong>Pending requests:</strong> <span id="overview-pending-count">—</span></p>
+      </div>
+      <div class="card">
+        <h3>Quick links</h3>
+        <div class="btn-row">
+          <a href="#requests" class="btn btn-secondary btn-sm" data-tab-link="requests">Review Join Requests</a>
+          <a href="#issues" class="btn btn-secondary btn-sm" data-tab-link="issues">View Issues</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="panel-requests" class="panel" hidden>
+    <div class="card">
+      <h2>Pending Join Requests</h2>
+      <div id="requests-list"></div>
+    </div>
+  </section>
+
+  <section id="panel-users" class="panel" hidden>
+    <div class="card">
+      <h2>PG Residents</h2>
+      <div id="users-list"></div>
+    </div>
+  </section>
+
+  <section id="panel-food" class="panel" hidden>
+    <div class="card">
+      <h2>Today's Menu</h2>
+      <form id="menu-form">
+        <div class="field">
+          <label for="menu-date">Date</label>
+          <input type="date" id="menu-date" required />
+        </div>
+        <div class="field-row two">
+          <div class="field"><label for="menu-breakfast">Breakfast</label><input type="text" id="menu-breakfast" /></div>
+          <div class="field"><label for="menu-lunch">Lunch</label><input type="text" id="menu-lunch" /></div>
+        </div>
+        <div class="field"><label for="menu-dinner">Dinner</label><input type="text" id="menu-dinner" /></div>
+        <button type="submit">Save Menu</button>
+      </form>
+    </div>
+    <div class="card">
+      <h2>Feedback for Today</h2>
+      <div id="feedback-list"></div>
+    </div>
+  </section>
+
+  <section id="panel-announcements" class="panel" hidden>
+    <div class="card">
+      <h2>New Announcement</h2>
+      <form id="announcement-form">
+        <div class="field-row two">
+          <div class="field"><label for="ann-title">Title</label><input type="text" id="ann-title" required /></div>
+          <div class="field">
+            <label for="ann-type">Type</label>
+            <select id="ann-type">
+              <option value="normal">Normal</option>
+              <option value="important">Important</option>
+              <option value="warning">Warning</option>
+            </select>
+          </div>
+        </div>
+        <div class="field"><label for="ann-message">Message</label><textarea id="ann-message" rows="3" required></textarea></div>
+        <button type="submit">Publish</button>
+      </form>
+    </div>
+    <div class="card">
+      <h2>Published Announcements</h2>
+      <div id="announcements-list"></div>
+    </div>
+  </section>
+
+  <section id="panel-issues" class="panel" hidden>
+    <div class="card">
+      <h2>Reported Issues</h2>
+      <div id="issues-list"></div>
+    </div>
+  </section>
+
+  <section id="panel-rent" class="panel" hidden>
+    <div class="card">
+      <h2>Add Rent Record</h2>
+      <form id="rent-form">
+        <div class="field">
+          <label for="rent-user">Resident</label>
+          <select id="rent-user" required></select>
+        </div>
+        <div class="field-row two">
+          <div class="field"><label for="rent-amount">Monthly rent</label><input type="number" id="rent-amount" min="1" step="0.01" required /></div>
+          <div class="field"><label for="rent-due">Due date</label><input type="date" id="rent-due" required /></div>
+        </div>
+        <button type="submit">Add Rent Record</button>
+      </form>
+    </div>
+    <div class="card">
+      <h2>All Rent Records</h2>
+      <div id="rent-list"></div>
+    </div>
+  </section>
+
+  <section id="panel-documents" class="panel" hidden>
+    <div class="card">
+      <h2>Upload Document</h2>
+      <form id="document-form">
+        <div class="field-row two">
+          <div class="field"><label for="doc-title">Title</label><input type="text" id="doc-title" required /></div>
+          <div class="field">
+            <label for="doc-category">Category</label>
+            <select id="doc-category">
+              <option value="rules">PG Rules</option>
+              <option value="agreement">Agreement</option>
+              <option value="notice">Notice</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+        </div>
+        <div class="field"><label for="doc-file">File (PDF, JPG, or PNG)</label><input type="file" id="doc-file" accept=".pdf,image/jpeg,image/png" required /></div>
+        <button type="submit">Upload</button>
+      </form>
+    </div>
+    <div class="card">
+      <h2>Uploaded Documents</h2>
+      <div id="documents-list"></div>
+    </div>
+  </section>
+
+  <section id="panel-settings" class="panel" hidden>
+    <div class="card">
+      <h2>Access Key</h2>
+      <p class="text-muted">Rotating the key invalidates the old one immediately. Share the new key with residents who still need to join.</p>
+      <button id="rotate-key-btn" class="btn-secondary">Rotate Access Key</button>
+      <div id="rotate-result"></div>
+    </div>
+    <div class="card">
+      <h2>Owner Contact Info</h2>
+      <p class="text-muted">This is what your residents see under "PG Owner".</p>
+      <form id="contact-form">
+        <div class="field"><label for="contact-phone">Phone</label><input type="tel" id="contact-phone" /></div>
+        <div class="field"><label for="contact-email">Email</label><input type="email" id="contact-email" /></div>
+        <button type="submit">Save</button>
+      </form>
+    </div>
+  </section>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/owner-dashboard.js"></script>
+</body>
+</html>

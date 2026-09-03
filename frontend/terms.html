@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Terms and Conditions — POV-ZEN</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div class="container" style="max-width:640px;">
+  <h1>Terms and Conditions</h1>
+  <div id="alert-box" hidden></div>
+
+  <div class="card">
+    <div style="max-height:320px; overflow-y:auto; padding-right:0.5rem; font-size:0.9rem; color:var(--color-text-muted);">
+      <p>By using POV-ZEN you agree to the following:</p>
+      <p>1. POV-ZEN is provided to help manage communication and day-to-day
+      operations within your PG. It is not a substitute for legal agreements
+      between you and your PG owner or residents.</p>
+      <p>2. Information you submit (issues, feedback, documents, rent records)
+      is visible only within your own PG group, as enforced by the platform,
+      and to your PG Owner where applicable.</p>
+      <p>3. Do not upload content that is unlawful, abusive, or that you do
+      not have the right to share.</p>
+      <p>4. PG Owners are responsible for the accuracy of announcements, food
+      menus, rent information, and documents they publish.</p>
+      <p>5. You are responsible for keeping your account credentials
+      confidential and for the accuracy of the information you provide.</p>
+      <p>6. This service is provided as-is, without warranty of any kind.</p>
+    </div>
+
+    <label style="display:flex; align-items:flex-start; gap:0.5rem; margin-top:1rem; font-weight:400;">
+      <input type="checkbox" id="accept-checkbox" style="width:auto; margin-top:0.2rem;" />
+      <span>I have read and accept the Terms and Conditions.</span>
+    </label>
+
+    <button id="accept-btn" style="width:100%; margin-top:1rem;" disabled>Continue</button>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script>
+  const alertBox = document.getElementById("alert-box");
+  const checkbox = document.getElementById("accept-checkbox");
+  const acceptBtn = document.getElementById("accept-btn");
+
+  checkbox.addEventListener("change", () => {
+    acceptBtn.disabled = !checkbox.checked;
+  });
+
+  async function routeAfterTerms() {
+    const me = await api.get("/api/auth/me");
+    if (me.role === "owner") {
+      window.location.href = "owner-dashboard.html";
+    } else if (me.group_id) {
+      window.location.href = "user-dashboard.html";
+    } else {
+      window.location.href = "join.html";
+    }
+  }
+
+  (async () => {
+    let me;
+    try {
+      me = await api.get("/api/auth/me");
+    } catch (e) {
+      window.location.href = "index.html";
+      return;
+    }
+    try {
+      const status = await api.get("/api/terms/status");
+      if (status.accepted) {
+        await routeAfterTerms();
+      }
+    } catch (e) {
+      // fall through — show the terms page
+    }
+  })();
+
+  acceptBtn.addEventListener("click", async () => {
+    acceptBtn.disabled = true;
+    try {
+      await api.post("/api/terms/accept", {});
+      await routeAfterTerms();
+    } catch (err) {
+      showAlert(alertBox, err.message || "Could not record acceptance.");
+      acceptBtn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>

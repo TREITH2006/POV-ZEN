@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Dashboard — POV-ZEN</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">POV-ZEN</div>
+  <div class="user-meta">
+    <span id="user-name"></span>
+    <button class="btn-secondary btn-sm" onclick="logout()">Log out</button>
+  </div>
+</div>
+
+<nav class="nav-tabs" id="tabs">
+  <a href="#food" data-tab="food" class="active">Today's Food</a>
+  <a href="#issues" data-tab="issues">Report Issue</a>
+  <a href="#announcements" data-tab="announcements">Announcements</a>
+  <a href="#rent" data-tab="rent">Rent</a>
+  <a href="#documents" data-tab="documents">Documents</a>
+  <a href="#owner" data-tab="owner">PG Owner</a>
+</nav>
+
+<div class="container">
+  <p class="text-muted" id="welcome-line" style="margin-bottom:1rem;"></p>
+  <div id="alert-box" hidden></div>
+
+  <section id="panel-food" class="panel">
+    <div class="card">
+      <h2 id="food-date-heading">Today's Menu</h2>
+      <div id="food-content"></div>
+    </div>
+  </section>
+
+  <section id="panel-issues" class="panel" hidden>
+    <div class="card">
+      <h2>Report an Issue</h2>
+      <form id="issue-form">
+        <div class="field-row two">
+          <div class="field">
+            <label for="issue-category">Category</label>
+            <select id="issue-category" required>
+              <option value="plumbing">Plumbing</option>
+              <option value="electricity">Electricity</option>
+              <option value="cleaning">Cleaning</option>
+              <option value="wifi">Wi-Fi</option>
+              <option value="room">Room</option>
+              <option value="bathroom">Bathroom</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="issue-room">Room number (optional)</label>
+            <input type="text" id="issue-room" />
+          </div>
+        </div>
+        <div class="field">
+          <label for="issue-description">Description</label>
+          <textarea id="issue-description" rows="3" required maxlength="2000"></textarea>
+        </div>
+        <div class="field">
+          <label for="issue-image">Photo (optional)</label>
+          <input type="file" id="issue-image" accept="image/png,image/jpeg,image/webp" />
+        </div>
+        <button type="submit">Submit Issue</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>My Reported Issues</h2>
+      <div id="my-issues-list"></div>
+    </div>
+  </section>
+
+  <section id="panel-announcements" class="panel" hidden>
+    <div class="card">
+      <h2>Announcements</h2>
+      <div id="announcements-list"></div>
+    </div>
+  </section>
+
+  <section id="panel-rent" class="panel" hidden>
+    <div class="card">
+      <h2>Rent</h2>
+      <div id="rent-list"></div>
+    </div>
+  </section>
+
+  <section id="panel-documents" class="panel" hidden>
+    <div class="card">
+      <h2>PG Documents</h2>
+      <div id="documents-list"></div>
+    </div>
+  </section>
+
+  <section id="panel-owner" class="panel" hidden>
+    <div class="card">
+      <h2>PG Owner Contact</h2>
+      <div id="owner-contact"></div>
+    </div>
+  </section>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/user-dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>POV-ZEN — PG Management</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div class="centered-auth">
+  <h1 style="text-align:center; margin-bottom:0.25rem;">POV-ZEN</h1>
+  <p class="text-muted" style="text-align:center; margin-bottom:1.5rem;">PG management, made simple.</p>
+
+  <div class="card">
+    <div class="auth-toggle" id="mode-toggle">
+      <button type="button" data-mode="login" class="active">Log in</button>
+      <button type="button" data-mode="register">Create account</button>
+    </div>
+
+    <div id="alert-box" hidden></div>
+
+    <!-- LOGIN FORM -->
+    <form id="login-form">
+      <div class="field">
+        <label for="login-email">Email</label>
+        <input type="email" id="login-email" required autocomplete="email" />
+      </div>
+      <div class="field">
+        <label for="login-password">Password</label>
+        <input type="password" id="login-password" required autocomplete="current-password" />
+      </div>
+      <button type="submit" style="width:100%;">Log in</button>
+    </form>
+
+    <!-- REGISTER FORM -->
+    <form id="register-form" hidden>
+      <div class="auth-toggle" id="role-toggle" style="margin-bottom:1rem;">
+        <button type="button" data-role="user" class="active">I'm a Resident</button>
+        <button type="button" data-role="owner">I'm a PG Owner</button>
+      </div>
+
+      <div class="field">
+        <label for="reg-name">Full name</label>
+        <input type="text" id="reg-name" required />
+      </div>
+      <div class="field">
+        <label for="reg-email">Email</label>
+        <input type="email" id="reg-email" required autocomplete="email" />
+      </div>
+      <div class="field">
+        <label for="reg-password">Password</label>
+        <input type="password" id="reg-password" required minlength="8" autocomplete="new-password" />
+        <span class="text-muted">At least 8 characters.</span>
+      </div>
+      <div class="field">
+        <label for="reg-phone">Phone (optional)</label>
+        <input type="tel" id="reg-phone" />
+      </div>
+
+      <div id="owner-fields" hidden>
+        <div class="field">
+          <label for="reg-pg-name">PG name</label>
+          <input type="text" id="reg-pg-name" />
+        </div>
+      </div>
+
+      <div id="user-fields">
+        <div class="field-row two">
+          <div class="field">
+            <label for="reg-room">Room number (optional)</label>
+            <input type="text" id="reg-room" />
+          </div>
+          <div class="field">
+            <label for="reg-sharing">Sharing type (optional)</label>
+            <select id="reg-sharing">
+              <option value="">Select</option>
+              <option value="1">1 (Single)</option>
+              <option value="2">2 sharing</option>
+              <option value="3">3 sharing</option>
+              <option value="4">4 sharing</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" style="width:100%;">Create account</button>
+    </form>
+  </div>
+</div>
+
+<footer class="legal">POV-ZEN &mdash; private PG management platform.</footer>
+
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/login.js"></script>
+</body>
+</html>

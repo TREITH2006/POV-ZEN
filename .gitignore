@@ -1,0 +1,16 @@
+.env
+*.db
+*.sqlite3
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+backend/uploads/issues/*
+!backend/uploads/issues/.gitkeep
+backend/uploads/documents/*
+!backend/uploads/documents/.gitkeep
+.pytest_cache/
+*.egg-info/
+node_modules/
+.DS_Store

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Your PG Access Key — POV-ZEN</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div class="centered-auth">
+  <h1 style="text-align:center;">POV-ZEN</h1>
+
+  <div class="card">
+    <h2>Your PG has been created</h2>
+    <p class="text-muted">
+      Share the access key below with your residents so they can request to join
+      <strong id="pg-name"></strong>. This key is shown only once — write it down now.
+      You can generate a new one later from your dashboard if needed.
+    </p>
+
+    <div class="field">
+      <label>Group ID</label>
+      <div class="key-display" id="group-id"></div>
+    </div>
+    <div class="field">
+      <label>Access Key</label>
+      <div class="key-display" id="access-key"></div>
+    </div>
+
+    <button id="continue-btn" style="width:100%; margin-top:0.5rem;">I've saved it — continue</button>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script>
+  const raw = sessionStorage.getItem("pov_zen_new_access_key");
+  if (!raw) {
+    window.location.href = "index.html";
+  } else {
+    const data = JSON.parse(raw);
+    document.getElementById("pg-name").textContent = data.pg_name;
+    document.getElementById("group-id").textContent = data.group_id;
+    document.getElementById("access-key").textContent = data.access_key;
+  }
+
+  document.getElementById("continue-btn").addEventListener("click", () => {
+    sessionStorage.removeItem("pov_zen_new_access_key");
+    window.location.href = "terms.html";
+  });
+</script>
+</body>
+</html>

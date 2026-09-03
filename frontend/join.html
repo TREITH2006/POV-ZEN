@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Join your PG — POV-ZEN</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">POV-ZEN</div>
+  <div class="user-meta">
+    <span id="user-name"></span>
+    <button class="btn-secondary btn-sm" onclick="logout()">Log out</button>
+  </div>
+</div>
+
+<div class="container" style="max-width:520px;">
+  <div class="card">
+    <h2>Join your PG</h2>
+    <p class="text-muted">
+      Ask your PG owner for the Access Key they generated when setting up
+      POV-ZEN, then enter it below to request access. Your owner will need to
+      approve the request before you can see your PG's information.
+    </p>
+
+    <div id="alert-box" hidden></div>
+    <div id="pending-box" hidden class="alert info">
+      Your request is pending approval from your PG owner. This page will
+      refresh automatically once approved.
+    </div>
+
+    <form id="join-form">
+      <div class="field">
+        <label for="access-key">Access Key</label>
+        <input type="text" id="access-key" required autocomplete="off" placeholder="e.g. XP7CT8VUWYBU" />
+      </div>
+      <button type="submit" style="width:100%;">Request to Join</button>
+    </form>
+  </div>
+</div>
+
+<script src="js/api.js"></script>
+<script src="js/ui.js"></script>
+<script>
+  const alertBox = document.getElementById("alert-box");
+  const pendingBox = document.getElementById("pending-box");
+  const form = document.getElementById("join-form");
+  let pollHandle;
+
+  async function checkGroupStatus() {
+    const me = await api.get("/api/auth/me");
+    if (me.group_id) {
+      window.location.href = "user-dashboard.html";
+    }
+  }
+
+  (async () => {
+    const me = await guardPage({ requireRole: "user" });
+    if (!me) return;
+    document.getElementById("user-name").textContent = me.name;
+
+    const existing = await api.get("/api/join-requests/mine");
+    if (existing && existing.status === "pending") {
+      form.hidden = true;
+      pendingBox.hidden = false;
+    } else if (existing && existing.status === "rejected") {
+      showAlert(alertBox, "Your previous request was rejected. You may try again with a valid access key.", "info");
+    }
+
+    pollHandle = setInterval(checkGroupStatus, 8000);
+  })();
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clearAlert(alertBox);
+    const accessKey = document.getElementById("access-key").value.trim();
+    const submitBtn = form.querySelector("button[type=submit]");
+    submitBtn.disabled = true;
+    try {
+      await api.post("/api/join-requests", { access_key: accessKey });
+      form.hidden = true;
+      pendingBox.hidden = false;
+    } catch (err) {
+      showAlert(alertBox, err.message || "Could not submit request.");
+    } finally {
+      submitBtn.disabled = false;
+    }
+  });
+</script>
+</body>
+</html>
