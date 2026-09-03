@@ -22,12 +22,21 @@ settings = get_settings()
 
 
 def _set_auth_cookie(response: Response, token: str) -> None:
+    # SameSite is configurable (COOKIE_SAMESITE) for deployments where the
+    # frontend and API are not same-site — see config.py for guidance. A
+    # browser refuses to send SameSite=None cookies over plain HTTP anyway,
+    # but the Secure flag is force-enabled here regardless of ENVIRONMENT so
+    # a misconfigured .env can't silently produce a cookie the browser drops.
+    # No `domain=` is set, so the cookie is host-only and scoped to whichever
+    # exact host issued it.
+    samesite = settings.cookie_samesite.lower()
+    secure = settings.is_production or samesite == "none"
     response.set_cookie(
         key=COOKIE_NAME,
         value=token,
         httponly=True,
-        secure=settings.is_production,
-        samesite="strict",
+        secure=secure,
+        samesite=samesite,
         max_age=settings.access_token_expire_minutes * 60,
         path="/",
     )

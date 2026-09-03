@@ -6,7 +6,7 @@ from slowapi.errors import RateLimitExceeded
 from config import get_settings
 import models  # noqa: F401 — ensures all models are registered on Base.metadata
 from rate_limit import limiter
-from routes import announcements, auth, documents, food, groups, issues, join_requests, rent, terms
+from routes import announcements, auth, documents, food, groups, issues, join_requests, rent, terms, website_issues
 
 settings = get_settings()
 
@@ -34,6 +34,7 @@ app.include_router(rent.router)
 app.include_router(documents.router)
 app.include_router(groups.router)
 app.include_router(terms.router)
+app.include_router(website_issues.router)
 
 
 @app.get("/api/health")

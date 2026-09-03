@@ -43,15 +43,31 @@ async function loadTab(name) {
 
 // ---------- Food ----------
 let currentMenu = null;
+let foodDateInitialized = false;
 
 async function loadFood() {
+  const dateInput = document.getElementById("food-date");
+  if (!foodDateInitialized) {
+    dateInput.valueAsDate = new Date();
+    dateInput.addEventListener("change", renderFoodForSelectedDate);
+    foodDateInitialized = true;
+  }
+  await renderFoodForSelectedDate();
+}
+
+async function renderFoodForSelectedDate() {
   const container = document.getElementById("food-content");
-  currentMenu = await api.get("/api/food/today");
+  const selectedDate = document.getElementById("food-date").value;
+  if (!selectedDate) return;
+
+  currentMenu = await api.get(`/api/food/by-date/${selectedDate}`);
+
+  const parsedDate = new Date(`${selectedDate}T00:00:00`);
   document.getElementById("food-date-heading").textContent =
-    "Today's Menu — " + new Date().toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" });
+    parsedDate.toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" });
 
   if (!currentMenu) {
-    container.innerHTML = `<div class="empty-state">No menu has been posted for today yet.</div>`;
+    container.innerHTML = `<div class="empty-state">No menu has been posted for this date yet.</div>`;
     return;
   }
 

@@ -14,7 +14,7 @@ os.environ["SECRET_KEY"] = "test-secret-key-not-for-production"
 os.environ["ENVIRONMENT"] = "test"
 os.environ["DATABASE_URL"] = f"sqlite:///{_TEST_DIR}/test.db"
 os.environ["UPLOAD_DIR"] = os.path.join(_TEST_DIR, "uploads")
-os.environ["CORS_ORIGINS"] = "http://localhost:5500"
+os.environ["CORS_ORIGINS"] = "http://localhost:5500,http://127.0.0.1:5500"
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -53,21 +53,27 @@ def unique_email(prefix: str) -> str:
     return f"{prefix}-{uuid.uuid4().hex[:8]}@example.com"
 
 
-def register_owner(c: TestClient, name: str, pg_name: str) -> dict:
+def register_owner(c: TestClient, name: str, pg_name: str, accept_terms: bool = True) -> dict:
     resp = c.post(
         "/api/auth/register/owner",
         json={"name": name, "email": unique_email(name.lower()), "password": "password123", "pg_name": pg_name},
     )
     assert resp.status_code == 201, resp.text
+    if accept_terms:
+        accepted = c.post("/api/terms/accept", json={})
+        assert accepted.status_code == 200, accepted.text
     return resp.json()
 
 
-def register_user(c: TestClient, name: str) -> dict:
+def register_user(c: TestClient, name: str, accept_terms: bool = True) -> dict:
     resp = c.post(
         "/api/auth/register/user",
         json={"name": name, "email": unique_email(name.lower()), "password": "password123"},
     )
     assert resp.status_code == 201, resp.text
+    if accept_terms:
+        accepted = c.post("/api/terms/accept", json={})
+        assert accepted.status_code == 200, accepted.text
     return resp.json()
 
 

@@ -36,8 +36,13 @@
     </label>
 
     <button id="accept-btn" style="width:100%; margin-top:1rem;" disabled>Continue</button>
+    <p id="already-accepted-note" class="text-muted" hidden style="margin-top:1rem;">
+      You have already accepted the current Terms and Conditions.
+    </p>
   </div>
 </div>
+
+<footer id="app-footer"></footer>
 
 <script src="js/api.js"></script>
 <script src="js/ui.js"></script>
@@ -45,6 +50,14 @@
   const alertBox = document.getElementById("alert-box");
   const checkbox = document.getElementById("accept-checkbox");
   const acceptBtn = document.getElementById("accept-btn");
+  const acceptRow = checkbox.closest("label");
+  const alreadyAcceptedNote = document.getElementById("already-accepted-note");
+
+  // A plain visit (from the onboarding flow) still auto-redirects once
+  // already accepted. ?view=1 (used by the footer's persistent Terms link,
+  // reachable from anywhere in the app) instead shows the text as a
+  // reference page, without bouncing an already-compliant user away.
+  const isViewMode = new URLSearchParams(window.location.search).get("view") === "1";
 
   checkbox.addEventListener("change", () => {
     acceptBtn.disabled = !checkbox.checked;
@@ -72,7 +85,13 @@
     try {
       const status = await api.get("/api/terms/status");
       if (status.accepted) {
-        await routeAfterTerms();
+        if (isViewMode) {
+          acceptRow.hidden = true;
+          acceptBtn.hidden = true;
+          alreadyAcceptedNote.hidden = false;
+        } else {
+          await routeAfterTerms();
+        }
       }
     } catch (e) {
       // fall through — show the terms page
