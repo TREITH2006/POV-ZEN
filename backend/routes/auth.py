@@ -22,6 +22,11 @@ settings = get_settings()
 
 
 def _set_auth_cookie(response: Response, token: str) -> None:
+    # SameSite=Strict is intentionally kept — it's safe as long as the
+    # frontend always calls this API on the same hostname it was served
+    # from (enforced on the frontend side in frontend/js/api.js), which
+    # keeps every request same-site. No `domain=` is set, so the cookie is
+    # host-only and scoped to whichever exact host issued it.
     response.set_cookie(
         key=COOKIE_NAME,
         value=token,

@@ -14,7 +14,7 @@ os.environ["SECRET_KEY"] = "test-secret-key-not-for-production"
 os.environ["ENVIRONMENT"] = "test"
 os.environ["DATABASE_URL"] = f"sqlite:///{_TEST_DIR}/test.db"
 os.environ["UPLOAD_DIR"] = os.path.join(_TEST_DIR, "uploads")
-os.environ["CORS_ORIGINS"] = "http://localhost:5500"
+os.environ["CORS_ORIGINS"] = "http://localhost:5500,http://127.0.0.1:5500"
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
