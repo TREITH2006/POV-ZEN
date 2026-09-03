@@ -41,5 +41,6 @@ class FoodFeedbackOut(BaseModel):
     rating: str
     comment: str | None
     created_at: datetime
+    updated_at: datetime
 
     model_config = {"from_attributes": True}

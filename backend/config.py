@@ -21,6 +21,15 @@ class Settings(BaseSettings):
     access_token_expire_minutes: int = 1440
     jwt_algorithm: str = "HS256"
 
+    # "strict" is correct — and requires no CSRF token — as long as the
+    # frontend and API are same-site (same registrable domain; subdomains of
+    # one shared domain, e.g. app.example.com + api.example.com, count as
+    # same-site). Only set this to "none" if frontend and API must live on
+    # genuinely unrelated domains; that combination requires secure=True
+    # (enforced in auth/security.py regardless of this value) and loses
+    # SameSite's CSRF protection entirely, so it is not recommended.
+    cookie_samesite: str = "strict"
+
     # Both local hostnames are allowed by default so CORS doesn't silently
     # under-allow if .env isn't loaded for some reason — a page opened via
     # either http://localhost:5500 or http://127.0.0.1:5500 must work.

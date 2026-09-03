@@ -141,20 +141,41 @@ async function loadUsers() {
 // ---------- Food ----------
 document.getElementById("menu-date").valueAsDate = new Date();
 
+let currentOwnerMenu = null;
+
 async function loadFood() {
+  await loadMenuForSelectedDate();
+}
+
+async function loadMenuForSelectedDate() {
+  const selectedDate = document.getElementById("menu-date").value;
+  if (!selectedDate) return;
+
+  try {
+    currentOwnerMenu = await api.get(`/api/food/by-date/${selectedDate}`);
+  } catch (err) {
+    showAlert(alertBox, err.message || "Could not load menu for that date.");
+    return;
+  }
+
+  document.getElementById("menu-breakfast").value = currentOwnerMenu?.breakfast || "";
+  document.getElementById("menu-lunch").value = currentOwnerMenu?.lunch || "";
+  document.getElementById("menu-dinner").value = currentOwnerMenu?.dinner || "";
+
   await renderFeedback();
 }
 
+document.getElementById("menu-date").addEventListener("change", loadMenuForSelectedDate);
+
 async function renderFeedback() {
   const list = document.getElementById("feedback-list");
-  const menu = await api.get("/api/food/today");
-  if (!menu) {
-    list.innerHTML = `<div class="empty-state">No menu posted for today yet.</div>`;
+  if (!currentOwnerMenu) {
+    list.innerHTML = `<div class="empty-state">No menu posted for this date yet.</div>`;
     return;
   }
-  const feedback = await api.get(`/api/food/${menu.id}/feedback`);
+  const feedback = await api.get(`/api/food/${currentOwnerMenu.id}/feedback`);
   if (feedback.length === 0) {
-    list.innerHTML = `<div class="empty-state">No feedback submitted yet today.</div>`;
+    list.innerHTML = `<div class="empty-state">No feedback submitted for this date yet.</div>`;
     return;
   }
   list.innerHTML = feedback.map((f) => `
@@ -179,8 +200,7 @@ document.getElementById("menu-form").addEventListener("submit", async (e) => {
   try {
     await api.post("/api/food", payload);
     showAlert(alertBox, "Menu saved.", "success");
-    loaded.delete("food");
-    await renderFeedback();
+    await loadMenuForSelectedDate();
   } catch (err) {
     showAlert(alertBox, err.message || "Could not save menu.");
   }

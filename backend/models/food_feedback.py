@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 
-from sqlalchemy import String, DateTime, ForeignKey, Text
+from sqlalchemy import String, DateTime, ForeignKey, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column
 
 from database import Base
@@ -9,6 +9,7 @@ from utils.ids import new_uuid
 
 class FoodFeedback(Base):
     __tablename__ = "food_feedback"
+    __table_args__ = (UniqueConstraint("menu_id", "user_id", name="uq_menu_user_feedback"),)
 
     id: Mapped[str] = mapped_column(String(32), primary_key=True, default=new_uuid)
     menu_id: Mapped[str] = mapped_column(String(32), ForeignKey("food_menus.id"), nullable=False)
@@ -17,3 +18,6 @@ class FoodFeedback(Base):
     rating: Mapped[str] = mapped_column(String(10), nullable=False)  # good/average/bad
     comment: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=lambda: datetime.now(timezone.utc))
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime, default=lambda: datetime.now(timezone.utc), onupdate=lambda: datetime.now(timezone.utc)
+    )

@@ -97,6 +97,35 @@ alembic revision --autogenerate -m "describe the change"
 alembic upgrade head
 ```
 
+## Production Deployment: Browser Auth & CORS
+
+The auth cookie is `HttpOnly` + `SameSite` (configurable via `COOKIE_SAMESITE`,
+default `strict`) with no `domain=` (host-only). What that means once the
+frontend and API are deployed over HTTPS on real domains:
+
+- **Recommended**: deploy the frontend and API as two subdomains of one
+  domain (e.g. `app.example.com` and `api.example.com`). Two subdomains of
+  the same domain are same-site, so `COOKIE_SAMESITE=strict` keeps working
+  exactly as it does locally, with zero extra configuration and no CSRF
+  token needed. Set `window.POV_ZEN_API_BASE = "https://api.example.com"`
+  before `js/api.js` loads (its local-dev default only auto-derives the
+  hostname for convenience; production must set this explicitly), and set
+  `CORS_ORIGINS=https://app.example.com` in the API's environment.
+- **If frontend and API must be on unrelated domains**: set
+  `COOKIE_SAMESITE=none`. The cookie is automatically forced `Secure`
+  whenever this is set (enforced in code, not just documentation — a
+  `SameSite=None` cookie without `Secure` is rejected by browsers anyway,
+  over plain HTTP it wouldn't be sent regardless). This combination loses
+  `SameSite`'s built-in CSRF protection; a same-site deployment above is
+  preferable specifically to avoid needing a separate CSRF mitigation.
+- Either way, set `ENVIRONMENT=production` in the API's environment — this
+  also gates the cookie's `Secure` flag under the default `strict` setting,
+  and controls other environment-specific behavior in `config.py`.
+- `CORS_ORIGINS` must list the exact deployed frontend origin(s) — never a
+  wildcard, since `allow_credentials=True` is required for the cookie to be
+  sent cross-origin at all, and browsers reject a wildcard origin combined
+  with credentials.
+
 ## Key Design Notes
 
 - **Group isolation** is enforced entirely server-side: every group-scoped

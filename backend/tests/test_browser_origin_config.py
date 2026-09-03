@@ -64,3 +64,22 @@ def test_login_cookie_is_httponly_strict_and_host_only(client):
     assert "samesite=strict" in lowered
     assert "domain=" not in lowered
     assert "secure" not in lowered  # test/dev environment is not_production
+
+
+def test_samesite_none_forces_secure_even_outside_production(client, monkeypatch):
+    """Production readiness guard: a deployment that sets COOKIE_SAMESITE=none
+    (frontend/API on unrelated domains) must get a Secure cookie regardless
+    of ENVIRONMENT — browsers reject SameSite=None without Secure anyway, but
+    this must not depend on remembering to also set ENVIRONMENT=production."""
+    monkeypatch.setattr("routes.auth.settings.cookie_samesite", "none")
+
+    email = unique_email("samesitenone")
+    resp = client.post(
+        "/api/auth/register/owner",
+        json={"name": "SameSite None Check", "email": email, "password": "password123", "pg_name": "X PG"},
+    )
+    assert resp.status_code == 201
+
+    set_cookie = resp.headers.get("set-cookie", "").lower()
+    assert "samesite=none" in set_cookie
+    assert "secure" in set_cookie

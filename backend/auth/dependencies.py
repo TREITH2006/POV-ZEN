@@ -6,7 +6,13 @@ from sqlalchemy.orm import Session
 from auth.security import COOKIE_NAME, decode_access_token
 from database import get_db
 from models.owner import Owner
+from models.terms_acceptance import TermsAcceptance
 from models.user import User
+from schemas.terms import CURRENT_TERMS_VERSION
+
+# Queries TermsAcceptance directly here (rather than importing
+# services.terms_service) to avoid a circular import: terms_service imports
+# Identity from this module.
 
 
 @dataclass(frozen=True)
@@ -46,13 +52,37 @@ def get_current_identity(request: Request, db: Session = Depends(get_db)) -> Ide
     raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Invalid session role")
 
 
-def require_owner(identity: Identity = Depends(get_current_identity)) -> Identity:
+def require_terms_accepted(
+    identity: Identity = Depends(get_current_identity), db: Session = Depends(get_db)
+) -> Identity:
+    """Backend enforcement of Terms acceptance for protected APIs. This is
+    deliberately NOT applied to get_current_identity itself — /api/auth/me
+    and /api/terms/* must stay reachable without having accepted yet, or a
+    user could never find out they need to accept, or actually accept."""
+    accepted = (
+        db.query(TermsAcceptance)
+        .filter(
+            TermsAcceptance.account_id == identity.account_id,
+            TermsAcceptance.version == CURRENT_TERMS_VERSION,
+        )
+        .first()
+        is not None
+    )
+    if not accepted:
+        raise HTTPException(
+            status.HTTP_403_FORBIDDEN,
+            "You must accept the current Terms and Conditions before continuing.",
+        )
+    return identity
+
+
+def require_owner(identity: Identity = Depends(require_terms_accepted)) -> Identity:
     if identity.role != "owner":
         raise HTTPException(status.HTTP_403_FORBIDDEN, "Owner access required")
     return identity
 
 
-def require_user(identity: Identity = Depends(get_current_identity)) -> Identity:
+def require_user(identity: Identity = Depends(require_terms_accepted)) -> Identity:
     if identity.role != "user":
         raise HTTPException(status.HTTP_403_FORBIDDEN, "User access required")
     return identity
@@ -67,7 +97,7 @@ def require_approved_user(identity: Identity = Depends(require_user)) -> Identit
     return identity
 
 
-def require_group_member(identity: Identity = Depends(get_current_identity)) -> Identity:
+def require_group_member(identity: Identity = Depends(require_terms_accepted)) -> Identity:
     """Either an Owner (always has a group) or an approved User. Used for
     read endpoints (announcements, food, documents, owner contact) that both
     roles are allowed to view within their own PG group."""

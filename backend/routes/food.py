@@ -33,6 +33,13 @@ def get_today_menu(identity: Identity = Depends(require_group_member), db: Sessi
     return food_service.get_menu_for_date(db, identity, date.today())
 
 
+@router.get("/by-date/{menu_date}", response_model=FoodMenuOut | None)
+def get_menu_by_date(
+    menu_date: date, identity: Identity = Depends(require_group_member), db: Session = Depends(get_db)
+):
+    return food_service.get_menu_for_date(db, identity, menu_date)
+
+
 @router.post("/{menu_id}/feedback", response_model=FoodFeedbackOut, status_code=201)
 def submit_feedback(
     menu_id: str,

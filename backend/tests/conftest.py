@@ -53,21 +53,27 @@ def unique_email(prefix: str) -> str:
     return f"{prefix}-{uuid.uuid4().hex[:8]}@example.com"
 
 
-def register_owner(c: TestClient, name: str, pg_name: str) -> dict:
+def register_owner(c: TestClient, name: str, pg_name: str, accept_terms: bool = True) -> dict:
     resp = c.post(
         "/api/auth/register/owner",
         json={"name": name, "email": unique_email(name.lower()), "password": "password123", "pg_name": pg_name},
     )
     assert resp.status_code == 201, resp.text
+    if accept_terms:
+        accepted = c.post("/api/terms/accept", json={})
+        assert accepted.status_code == 200, accepted.text
     return resp.json()
 
 
-def register_user(c: TestClient, name: str) -> dict:
+def register_user(c: TestClient, name: str, accept_terms: bool = True) -> dict:
     resp = c.post(
         "/api/auth/register/user",
         json={"name": name, "email": unique_email(name.lower()), "password": "password123"},
     )
     assert resp.status_code == 201, resp.text
+    if accept_terms:
+        accepted = c.post("/api/terms/accept", json={})
+        assert accepted.status_code == 200, accepted.text
     return resp.json()
 
 
